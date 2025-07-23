@@ -288,13 +288,14 @@ class Gamesetup extends Admin_Controller
                     'short_code' => 'student_games',
                     'system' => 0,
                     'sort_order' => 101,
-                    'is_active' => 1
+                    'is_active' => 1,
+                    'created_at' => date('Y-m-d H:i:s')
                 );
                 
                 if ($this->db->insert('permission_group', $permission_group_data)) {
                     $student_game_group_id = $this->db->insert_id();
                     $results['success']++;
-                    $results['messages'][] = "✓ Added Student Games permission group";
+                    $results['messages'][] = "✓ Added Student Games permission group (ID: $student_game_group_id)";
                     
                     // Add permission categories for student games
                     $categories = array(
