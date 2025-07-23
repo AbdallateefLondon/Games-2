@@ -434,7 +434,8 @@ class Gamebuilder extends Admin_Controller
      */
     public function delete($id)
     {
-        if (!$this->rbac->hasPrivilege('games_management', 'can_delete')) {
+        // Super Admin has automatic access, others need permission
+        if ($this->session->userdata('admin')['role_id'] != 7 && !$this->rbac->hasPrivilege('games_management', 'can_delete')) {
             access_denied();
         }
 
