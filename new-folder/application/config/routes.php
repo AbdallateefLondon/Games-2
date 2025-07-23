@@ -38,5 +38,16 @@ $route['frontend'] = 'welcome';
 $route['cbseexam'] = 'welcome/cbseexam';
 $route['online_course'] = 'course';
 
+// Educational Game Builder Routes
+$route['gamebuilder'] = 'gamebuilder/index';
+$route['gamebuilder/student-games'] = 'gamebuilder/student_games';
+$route['gamebuilder/play/(:num)'] = 'gamebuilder/play_game/$1';
+$route['gamebuilder/create'] = 'gamebuilder/create';
+$route['gamebuilder/create/(:num)'] = 'gamebuilder/create/$1';
+$route['gamebuilder/results'] = 'gamebuilder/results';
+$route['gamebuilder/results/(:num)'] = 'gamebuilder/results/$1';
+$route['gamebuilder/leaderboard'] = 'gamebuilder/leaderboard';
+$route['gamebuilder/dashboard'] = 'gamebuilder/dashboard';
+
  
  
