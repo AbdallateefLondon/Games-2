@@ -214,13 +214,14 @@ class Gamesetup extends Admin_Controller
                     'short_code' => 'game_builder',
                     'system' => 0,
                     'sort_order' => 100,
-                    'is_active' => 1
+                    'is_active' => 1,
+                    'created_at' => date('Y-m-d H:i:s')
                 );
                 
                 if ($this->db->insert('permission_group', $permission_group_data)) {
                     $game_group_id = $this->db->insert_id();
                     $results['success']++;
-                    $results['messages'][] = "✓ Added Game Builder permission group";
+                    $results['messages'][] = "✓ Added Game Builder permission group (ID: $game_group_id)";
                     
                     // Add permission categories for game builder
                     $categories = array(
@@ -259,6 +260,10 @@ class Gamesetup extends Admin_Controller
                     if ($this->db->insert_batch('permission_category', $categories)) {
                         $results['success']++;
                         $results['messages'][] = "✓ Added Game Builder permission categories";
+                        
+                        // Grant all permissions to Super Admin (role_id = 7) automatically
+                        $this->grantSuperAdminPermissions($game_group_id);
+                        $results['messages'][] = "✓ Granted Game Builder permissions to Super Admin";
                     }
                 } else {
                     $results['errors']++;
@@ -266,6 +271,11 @@ class Gamesetup extends Admin_Controller
                 }
             } else {
                 $results['messages'][] = "- Game Builder permission group already exists";
+                
+                // Still grant Super Admin permissions if they don't exist
+                $existing_group = $existing->row();
+                $this->grantSuperAdminPermissions($existing_group->id);
+                $results['messages'][] = "✓ Verified Super Admin Game Builder permissions";
             }
 
             // 5. Add Student Games permission group
