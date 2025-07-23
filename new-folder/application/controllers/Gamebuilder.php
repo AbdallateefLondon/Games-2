@@ -61,6 +61,7 @@ class Gamebuilder extends Admin_Controller
      */
     public function student_games()
     {
+        // Students need play_games permission
         if (!$this->rbac->hasPrivilege('play_games', 'can_view')) {
             access_denied();
         }
