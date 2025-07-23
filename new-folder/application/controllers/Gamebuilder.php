@@ -356,7 +356,8 @@ class Gamebuilder extends Admin_Controller
      */
     public function results($game_id = null)
     {
-        if (!$this->rbac->hasPrivilege('game_results', 'can_view')) {
+        // Super Admin has automatic access, others need permission
+        if ($this->session->userdata('admin')['role_id'] != 7 && !$this->rbac->hasPrivilege('game_results', 'can_view')) {
             access_denied();
         }
 
