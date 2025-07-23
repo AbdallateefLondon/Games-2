@@ -371,6 +371,11 @@ if ($role == 'student' || $role == 'parent') {
                             <li class="<?php echo set_Topmenu('Homework'); ?>"><a href="<?php echo base_url(); ?>user/homework"><i class="fa fa-flask ftlayer"></i> <span><?php echo $this->lang->line('homework'); ?></span></a></li>
                         <?php }?>
 
+                        <!-- Educational Games Section -->
+                        <?php if ($this->rbac->hasPrivilege('play_games', 'can_view')) {?>
+                            <li class="<?php echo set_Topmenu('games'); ?>"><a href="<?php echo base_url(); ?>gamebuilder/student-games"><i class="fa fa-gamepad ftlayer"></i> <span>Educational Games</span></a></li>
+                        <?php }?>
+
                         <?php if ($this->module_lib->hasActive('online_examination') && $this->studentmodule_lib->hasActive('online_examination')) {?>
                             <li class="treeview <?php echo set_Topmenu('Onlineexam'); ?>"><a href="<?php echo site_url('user/onlineexam'); ?>"><i class="fa fa-rss ftlayer"></i> <span><?php echo $this->lang->line('online_exam'); ?></span></a></li>
                         <?php }?>
