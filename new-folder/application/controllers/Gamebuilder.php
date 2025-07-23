@@ -227,6 +227,7 @@ class Gamebuilder extends Admin_Controller
      */
     public function submit_game()
     {
+        // Students need play_games permission
         if (!$this->rbac->hasPrivilege('play_games', 'can_view')) {
             $this->output->set_status_header(403);
             echo json_encode(array('status' => 'error', 'message' => 'Access denied'));
