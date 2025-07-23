@@ -89,10 +89,13 @@ class Gamebuilder extends Admin_Controller
      */
     public function create($id = null)
     {
-        if (!$this->rbac->hasPrivilege('games_management', 'can_add') && !$id) {
+        // Super Admin has automatic access, others need specific permissions
+        $is_super_admin = ($this->session->userdata('admin')['role_id'] == 7);
+        
+        if (!$is_super_admin && !$this->rbac->hasPrivilege('games_management', 'can_add') && !$id) {
             access_denied();
         }
-        if (!$this->rbac->hasPrivilege('games_management', 'can_edit') && $id) {
+        if (!$is_super_admin && !$this->rbac->hasPrivilege('games_management', 'can_edit') && $id) {
             access_denied();
         }
 
