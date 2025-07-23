@@ -401,4 +401,36 @@ class Gamesetup extends Admin_Controller
 
         redirect('admin/gamesetup');
     }
+
+    /**
+     * Grant Super Admin permissions automatically
+     */
+    private function grantSuperAdminPermissions($permission_group_id)
+    {
+        // Get all permission categories for this group
+        $this->db->where('perm_group_id', $permission_group_id);
+        $categories = $this->db->get('permission_category')->result();
+        
+        foreach ($categories as $category) {
+            // Check if Super Admin already has this permission
+            $this->db->where('role_id', 7); // Super Admin role ID
+            $this->db->where('perm_cat_id', $category->id);
+            $existing = $this->db->get('roles_permissions');
+            
+            if ($existing->num_rows() == 0) {
+                // Grant full permissions to Super Admin
+                $permission_data = array(
+                    'role_id' => 7,
+                    'perm_cat_id' => $category->id,
+                    'can_view' => 1,
+                    'can_add' => $category->enable_add,
+                    'can_edit' => $category->enable_edit,
+                    'can_delete' => $category->enable_delete,
+                    'created_at' => date('Y-m-d H:i:s')
+                );
+                
+                $this->db->insert('roles_permissions', $permission_data);
+            }
+        }
+    }
 }
