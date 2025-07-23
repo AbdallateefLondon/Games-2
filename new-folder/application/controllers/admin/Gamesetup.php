@@ -365,6 +365,142 @@ class Gamesetup extends Admin_Controller
     }
 
     /**
+     * Add menu items to admin navigation
+     */
+    public function add_menu_items()
+    {
+        // Check if user has permission (only super admin should access this)
+        if ($this->session->userdata('admin')['role_id'] != 7) {
+            access_denied();
+        }
+
+        $this->db->trans_start();
+        
+        $results = array(
+            'success' => 0,
+            'errors' => 0,
+            'messages' => array()
+        );
+
+        try {
+            // Check what menu table structure this system uses
+            $tables = $this->db->list_tables();
+            
+            if (in_array('sidebar_menus', $tables)) {
+                // Method 1: Standard sidebar_menus structure
+                $this->addStandardMenus($results);
+            } elseif (in_array('sidebar_list', $tables)) {
+                // Method 2: Alternative sidebar_list structure  
+                $this->addAlternativeMenus($results);
+            } else {
+                $results['errors']++;
+                $results['messages'][] = "✗ Could not find compatible menu table structure";
+            }
+
+        } catch (Exception $e) {
+            $results['errors']++;
+            $results['messages'][] = "✗ Error adding menus: " . $e->getMessage();
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            $results['overall_success'] = false;
+        } else {
+            $results['overall_success'] = true;
+        }
+
+        // Display results
+        $data['title'] = 'Menu Integration Results';
+        $data['results'] = $results;
+        
+        $this->load->view('layout/header', $data);
+        $this->load->view('gamebuilder/setup_results', $data);
+        $this->load->view('layout/footer', $data);
+    }
+
+    /**
+     * Add menus using standard structure
+     */
+    private function addStandardMenus(&$results)
+    {
+        // Check if main menu already exists
+        $this->db->where('short_code', 'educational_games');
+        $existing = $this->db->get('sidebar_menus');
+        
+        if ($existing->num_rows() == 0) {
+            // Insert main menu
+            $menu_data = array(
+                'name' => 'Educational Games',
+                'lang_key' => 'educational_games', 
+                'icon' => 'fa fa-gamepad',
+                'url' => '#',
+                'activate_menu' => 'games',
+                'short_code' => 'educational_games',
+                'sort_order' => 28,
+                'system' => 0,
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s')
+            );
+            
+            if ($this->db->insert('sidebar_menus', $menu_data)) {
+                $menu_id = $this->db->insert_id();
+                $results['success']++;
+                $results['messages'][] = "✓ Added Educational Games main menu";
+                
+                // Add submenus
+                $submenus = array(
+                    array('name' => 'Game Management', 'lang_key' => 'game_management', 'url' => 'gamebuilder', 'controller' => 'gamebuilder', 'methods' => 'index,create,edit,delete', 'permission' => 'games_management', 'sort' => 1),
+                    array('name' => 'Game Results', 'lang_key' => 'game_results', 'url' => 'gamebuilder/results', 'controller' => 'gamebuilder', 'methods' => 'results', 'permission' => 'game_results', 'sort' => 2),
+                    array('name' => 'Analytics Dashboard', 'lang_key' => 'game_analytics', 'url' => 'gamebuilder/dashboard', 'controller' => 'gamebuilder', 'methods' => 'dashboard', 'permission' => 'games_management', 'sort' => 3),
+                    array('name' => 'Leaderboard', 'lang_key' => 'game_leaderboard', 'url' => 'gamebuilder/leaderboard', 'controller' => 'gamebuilder', 'methods' => 'leaderboard', 'permission' => 'game_leaderboard', 'sort' => 4)
+                );
+                
+                foreach ($submenus as $submenu) {
+                    $submenu_data = array(
+                        'sidebar_menu_id' => $menu_id,
+                        'name' => $submenu['name'],
+                        'lang_key' => $submenu['lang_key'],
+                        'url' => $submenu['url'],
+                        'activate_controller' => $submenu['controller'],
+                        'activate_methods' => $submenu['methods'],
+                        'permission_key' => $submenu['permission'],
+                        'sort_order' => $submenu['sort'],
+                        'is_active' => 1,
+                        'created_at' => date('Y-m-d H:i:s')
+                    );
+                    
+                    if ($this->db->insert('sidebar_sub_menus', $submenu_data)) {
+                        $results['success']++;
+                        $results['messages'][] = "✓ Added " . $submenu['name'] . " submenu";
+                    } else {
+                        $results['errors']++;
+                        $results['messages'][] = "✗ Failed to add " . $submenu['name'] . " submenu";
+                    }
+                }
+            } else {
+                $results['errors']++;
+                $results['messages'][] = "✗ Failed to add main Educational Games menu";
+            }
+        } else {
+            $results['messages'][] = "- Educational Games menu already exists";
+        }
+    }
+
+    /**
+     * Add menus using alternative structure
+     */
+    private function addAlternativeMenus(&$results)
+    {
+        // Alternative method for different menu structures
+        $results['messages'][] = "- Using alternative menu structure (manual setup may be required)";
+        
+        // You would implement this based on your specific menu table structure
+        // This is a placeholder for systems that use different menu organization
+    }
+    }
+
+    /**
      * Reset/uninstall the game system (for development purposes)
      */
     public function uninstall()
